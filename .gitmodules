@@ -1,0 +1,3 @@
+[submodule "libmysqlhll/cpp-hyperloglog"]
+	path = libmysqlhll/cpp-hyperloglog
+	url = https://github.com/hideo55/cpp-HyperLogLog.git
