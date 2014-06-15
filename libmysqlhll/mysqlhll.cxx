@@ -27,6 +27,13 @@ char *hll_merge(UDF_INIT *initid, UDF_ARGS *args, char *result,
 void hll_merge_clear(UDF_INIT* initid, char* is_null, char* message);
 void hll_merge_add(UDF_INIT* initid, UDF_ARGS* args, char* is_null, char* message);
 
+my_bool hll_merge_compute_init(UDF_INIT *initid, UDF_ARGS *args, char *message);
+void hll_merge_compute_deinit(UDF_INIT *initid);
+long long hll_merge_compute(UDF_INIT *initid, UDF_ARGS *args, char *result,
+          unsigned long *length, char *is_null, char *error);
+void hll_merge_compute_clear(UDF_INIT* initid, char* is_null, char* message);
+void hll_merge_compute_add(UDF_INIT* initid, UDF_ARGS* args, char* is_null, char* message);
+
 class Data {
   public: 
     SerializedHyperLogLog* shll;
@@ -129,21 +136,25 @@ void hll_compute_add(UDF_INIT* initid, UDF_ARGS* args, char* is_null, char* mess
   hll_create_add(initid, args, is_null, message);
 }
 
-my_bool hll_merge_init(UDF_INIT *initid, UDF_ARGS *args, char *message) {
+my_bool merge_init(UDF_INIT *initid, UDF_ARGS *args, char *message, bool need_result, const char* function_name) {
   if (args->arg_count == 0) {
-    strcpy(message,"Wrong arguments to HLL_MERGE();  Must have at least 1 argument");
+    sprintf(message,"Wrong arguments to %s();  Must have at least 1 argument", function_name);
     return 1;
   }
 
   for(int i = 0; i < args->arg_count; ++i) {
     if (args->arg_type[i] != STRING_RESULT) {
-      strcpy(message,"Wrong arguments to HLL_MERGE();  All arguments must be of type string");
+      sprintf(message,"Wrong arguments to %s();  All arguments must be of type string", function_name);
       return 1;    
     }
   }
 
-  initid->ptr = (char*)new Data(true);
+  initid->ptr = (char*)new Data(need_result);
   return 0;
+}
+
+my_bool hll_merge_init(UDF_INIT *initid, UDF_ARGS *args, char *message) {
+  return merge_init(initid, args, message, true, "HLL_MERGE");
 }
 
 void hll_merge_deinit(UDF_INIT *initid) {
@@ -177,6 +188,27 @@ void hll_merge_add(UDF_INIT* initid, UDF_ARGS* args, char* is_null, char* messag
       delete current_shll;
     }
   }
+}
+
+my_bool hll_merge_compute_init(UDF_INIT *initid, UDF_ARGS *args, char *message) {
+  return merge_init(initid, args, message, false, "HLL_MERGE_COMPUTE");
+}
+
+void hll_merge_compute_deinit(UDF_INIT *initid) {
+  hll_merge_deinit(initid);
+}
+
+long long hll_merge_compute(UDF_INIT *initid, UDF_ARGS *args, char *result,
+          unsigned long *length, char *is_null, char *error) {
+  return shll(initid)->estimate();
+}
+
+void hll_merge_compute_clear(UDF_INIT* initid, char* is_null, char* message) {
+  hll_merge_clear(initid, is_null, message);
+}
+
+void hll_merge_compute_add(UDF_INIT* initid, UDF_ARGS* args, char* is_null, char* message) {
+  hll_merge_add(initid, args, is_null, message);
 }
 
 }
