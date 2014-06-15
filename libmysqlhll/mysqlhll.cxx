@@ -25,19 +25,25 @@ class Data {
     SerializedHyperLogLog* shll;
     char* result;
 
-    Data() {
+    Data(bool need_result) {
       shll = new SerializedHyperLogLog(12);
-      result = (char*)malloc(10000);
+
+      if (need_result) {
+        result = (char*)malloc(10000);
+      } else {
+        result = NULL;
+      }
     }
 
     ~Data() {
       delete shll;
-      free(result);
+      if (result != NULL) {
+        free(result);
+      }
     }
 };
 
-my_bool hll_create_init(UDF_INIT *initid, UDF_ARGS *args, char *message) {
-
+my_bool init(UDF_INIT *initid, UDF_ARGS *args, char *message, bool need_result) {
   if (args->arg_count == 0) {
     strcpy(message,"Wrong arguments to HLL();  Must have at least 1 argument");
     return 1;
@@ -47,8 +53,12 @@ my_bool hll_create_init(UDF_INIT *initid, UDF_ARGS *args, char *message) {
     args->arg_type[i] = STRING_RESULT;
   }
 
-  initid->ptr = (char*)new Data();
+  initid->ptr = (char*)new Data(need_result);
   return 0;
+}
+
+my_bool hll_create_init(UDF_INIT *initid, UDF_ARGS *args, char *message) {
+  return init(initid, args, message, true);
 }
 
 Data* data(UDF_INIT *initid) {
@@ -82,14 +92,14 @@ void hll_create_clear(UDF_INIT* initid, char* is_null, char* message) {
 
 void hll_create_add(UDF_INIT* initid, UDF_ARGS* args, char* is_null, char* message) {
   for(int i = 0; i < args->arg_count; ++i) {
-    LOG("hll_add %*s %d\n", (int)args->lengths[i], args->args[i], (int)args->lengths[i]);
+    LOG("hll_add %.*s %d\n", (int)args->lengths[i], args->args[i], (int)args->lengths[i]);
 
     shll(initid)->add(args->args[i], args->lengths[i]);
   }
 }
 
 my_bool hll_compute_init(UDF_INIT *initid, UDF_ARGS *args, char *message) {
-  return hll_create_init(initid, args, message);
+  return init(initid, args, message, false);
 }
 
 void hll_compute_deinit(UDF_INIT *initid) {
