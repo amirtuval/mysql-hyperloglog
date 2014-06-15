@@ -4,7 +4,11 @@
 
 extern "C" {
 
-#define LOG(...) fprintf(stderr, __VA_ARGS__);
+#ifndef NDEBUG
+ #define LOG(...) fprintf(stderr, __VA_ARGS__);
+#else
+ #define LOG(...)
+#endif
 
 my_bool hll_create_init(UDF_INIT *initid, UDF_ARGS *args, char *message);
 void hll_create_deinit(UDF_INIT *initid);
