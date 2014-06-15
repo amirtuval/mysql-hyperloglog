@@ -20,6 +20,13 @@ long long hll_compute(UDF_INIT *initid, UDF_ARGS *args, char *result,
 void hll_compute_clear(UDF_INIT* initid, char* is_null, char* message);
 void hll_compute_add(UDF_INIT* initid, UDF_ARGS* args, char* is_null, char* message);
 
+my_bool hll_merge_init(UDF_INIT *initid, UDF_ARGS *args, char *message);
+void hll_merge_deinit(UDF_INIT *initid);
+char *hll_merge(UDF_INIT *initid, UDF_ARGS *args, char *result,
+          unsigned long *length, char *is_null, char *error);
+void hll_merge_clear(UDF_INIT* initid, char* is_null, char* message);
+void hll_merge_add(UDF_INIT* initid, UDF_ARGS* args, char* is_null, char* message);
+
 class Data {
   public: 
     SerializedHyperLogLog* shll;
@@ -43,9 +50,9 @@ class Data {
     }
 };
 
-my_bool init(UDF_INIT *initid, UDF_ARGS *args, char *message, bool need_result) {
+my_bool init(UDF_INIT *initid, UDF_ARGS *args, char *message, bool need_result, const char* function_name) {
   if (args->arg_count == 0) {
-    strcpy(message,"Wrong arguments to HLL();  Must have at least 1 argument");
+    sprintf(message, "Wrong arguments to %s();  Must have at least 1 argument", function_name);
     return 1;
   }
 
@@ -58,7 +65,7 @@ my_bool init(UDF_INIT *initid, UDF_ARGS *args, char *message, bool need_result) 
 }
 
 my_bool hll_create_init(UDF_INIT *initid, UDF_ARGS *args, char *message) {
-  return init(initid, args, message, true);
+  return init(initid, args, message, true, "HLL_CREATE");
 }
 
 Data* data(UDF_INIT *initid) {
@@ -99,7 +106,7 @@ void hll_create_add(UDF_INIT* initid, UDF_ARGS* args, char* is_null, char* messa
 }
 
 my_bool hll_compute_init(UDF_INIT *initid, UDF_ARGS *args, char *message) {
-  return init(initid, args, message, false);
+  return init(initid, args, message, false, "HLL_COMPUTE");
 }
 
 void hll_compute_deinit(UDF_INIT *initid) {
@@ -120,6 +127,56 @@ void hll_compute_clear(UDF_INIT* initid, char* is_null, char* message) {
 void hll_compute_add(UDF_INIT* initid, UDF_ARGS* args, char* is_null, char* message) {
   LOG("hll_compute_add\n");
   hll_create_add(initid, args, is_null, message);
+}
+
+my_bool hll_merge_init(UDF_INIT *initid, UDF_ARGS *args, char *message) {
+  if (args->arg_count == 0) {
+    strcpy(message,"Wrong arguments to HLL_MERGE();  Must have at least 1 argument");
+    return 1;
+  }
+
+  for(int i = 0; i < args->arg_count; ++i) {
+    if (args->arg_type[i] != STRING_RESULT) {
+      strcpy(message,"Wrong arguments to HLL_MERGE();  All arguments must be of type string");
+      return 1;    
+    }
+  }
+
+  initid->ptr = (char*)new Data(true);
+  return 0;
+}
+
+void hll_merge_deinit(UDF_INIT *initid) {
+  delete data(initid);
+}
+
+char *hll_merge(UDF_INIT *initid, UDF_ARGS *args, char *result,
+          unsigned long *length, char *is_null, char *error) {
+  LOG("hll_merge\n");
+  return hll_create(initid, args, result, length, is_null, error);
+}
+
+void hll_merge_clear(UDF_INIT* initid, char* is_null, char* message) {
+  LOG("hll_merge_clear\n");
+  shll(initid)->clear();
+}
+
+void hll_merge_add(UDF_INIT* initid, UDF_ARGS* args, char* is_null, char* message) {
+  for(int i = 0; i < args->arg_count; ++i) {
+    LOG("hll_merge_add %d\n", i);
+    long length = args->lengths[i];
+    char* arg = args->args[i];
+    LOG("hll_add %.*s %d\n", (int)length, arg, (int)length);
+    char* hll_str = (char*)malloc(length + 1);
+    strncpy(hll_str, arg, length);
+    hll_str[length] = '\0';
+
+    SerializedHyperLogLog* current_shll = SerializedHyperLogLog::fromString(hll_str);
+    if (current_shll != NULL) {
+      shll(initid)->merge(*current_shll);
+      delete current_shll;
+    }
+  }
 }
 
 }

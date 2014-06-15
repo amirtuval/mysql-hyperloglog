@@ -31,6 +31,8 @@ public:
       size_t outputLength;
       unsigned char* decoded = base64_decode(base64, strlen(base64), &outputLength);
 
+      if (decoded == NULL) return NULL;
+
       for(int i = 0; i < outputLength; ++i) {
          result->M_[i] = decoded[i];
       }
