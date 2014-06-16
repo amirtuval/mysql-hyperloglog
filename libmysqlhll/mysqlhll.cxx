@@ -1,5 +1,6 @@
 #include <mysql.h>
 
+#include "constants.hpp"
 #include "SerializedHyperLogLog.hpp"
 
 extern "C" {
@@ -44,7 +45,7 @@ class Data {
     char* result;
 
     Data(bool need_result) {
-      shll = new SerializedHyperLogLog(12);
+      shll = new SerializedHyperLogLog(HLL_BIT_WIDTH);
 
       if (need_result) {
         result = (char*)malloc(10000);
