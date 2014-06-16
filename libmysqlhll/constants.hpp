@@ -1,0 +1,1 @@
+#define HLL_BIT_WIDTH 12
