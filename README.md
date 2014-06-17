@@ -54,4 +54,8 @@ in mysql client (On linux, it is usually /usr/lib/mysql/plugin/).
 After that login to mysql as root, and run [the functions installation script](sql/udf.sql). Replace .so with .dll if you are on windows.
 
 
+Customization
+=============
 
+If you would like to change the bit width of the HyperLogLog algorithm, you can change it by editing the [constants.hpp file](libmysqlhll/constants.hpp) before compiling the project.  
+The default is 12, resulting in 2**12(4096) bytes of storage. This can go as high as 16 to get better accuracy with more storage, or you can lower it to save storage.
