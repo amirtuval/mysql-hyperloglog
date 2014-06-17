@@ -30,3 +30,28 @@ HyperLogLog stores its data as a byte vector. An HLL string is the base64 repres
 In its default implementation, the plugin uses hyperloglog with a 12 bit width, resulting in a 4096 bytes vector. Base64 string of that is ~5500 chars long.
   
 [Here's a more detailed example](sql/example.sql).
+
+Installation
+============
+
+Compilation
+-----------
+
+The project uses [CMake](http://www.cmake.org/) as a build tool, and the code is platform independent, so it should compile fine on most platforms (linux, windows, mac).  
+
+**TODO:** Add specific instructions for the major platforms.
+
+MySQL Installation
+------------------
+
+Once the binary is compiled (.so on linux, .dll on windows), you have to copy it to the MySQL plugins dir.  
+If you are not sure what it is, you can check by running this command 
+  
+`show variables like '%plugins%';`  
+  
+in mysql client (On linux, it is usually /usr/lib/mysql/plugin/).
+
+After that login to mysql as root, and run [the functions installation script](sql/udf.sql). Replace .so with .dll if you are on windows.
+
+
+
