@@ -45,9 +45,9 @@ MySQL Installation
 ------------------
 
 Once the binary is compiled (.so on linux, .dll on windows), you have to copy it to the MySQL plugins dir.  
-If you are not sure what it is, you can check by running this command 
+If you are not sure where that is, you can check by running this command 
   
-`show variables like '%plugins%';`  
+`show variables like '%plugin%';`  
   
 in mysql client (On linux, it is usually /usr/lib/mysql/plugin/).
 
