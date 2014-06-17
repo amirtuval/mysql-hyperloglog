@@ -5,8 +5,16 @@ A MySQL plugin for [the HyperLogLog Algorithm](http://en.wikipedia.org/wiki/Hype
 When installed, the plugin adds several aggregate functions to mysql, that allows you to estimate the distinct count of large datasets.  
 You can use it as a replacement for count(distinct). However, the real power of the plugin is by storing the hyperloglog result in an [aggregate table](http://en.wikipedia.org/wiki/Aggregate_(data_warehouse)), which allows you to get an estimate of the distinct count from the aggregate.
 
+
+
 **Note:** An estimated count is just like it sounds - an estimate, and therefore, not 100% accurate. You can expect several percentages of difference between the actual count and the estimated count, so it might not be suitable for all use cases.  
 Hyperloglog trades space for accuracy, so you can increase the accuracy by allowing HLL to store more data. More on that later.
+
+Thanks
+======
+
+The excellent [cpp-hyperloglog](https://github.com/hideo55/cpp-HyperLogLog) project is used for the actual HyperLogLog implementation.  
+Thanks, Hideaki Ohno.
 
 Usage
 =====
