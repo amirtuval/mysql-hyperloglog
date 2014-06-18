@@ -1,3 +1,8 @@
+#ifdef WIN32
+#include <winsock.h>
+typedef signed char int8_t;
+#endif
+
 #include <mysql.h>
 
 #include "constants.hpp"

@@ -8,3 +8,11 @@ install_manifest.txt
 *.so
 *.*~
 libmysqlhll-test
+*vcxproj*
+*.sln
+*.suo
+*.sdf
+*.opensdf
+Win32/
+libmysqlhll/mysqlhll.dir/
+Debug/

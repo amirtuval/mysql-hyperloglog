@@ -1,7 +1,7 @@
 #if !defined(SERIALIZED_HYPERLOGLOG_HPP)
 #define SERIALIZED_HYPERLOGLOG_HPP
 
-#include <stdio.h>
+//#include <stdio.h>
 #include <string.h>
 
 #include "hyperloglog.hpp"
@@ -10,7 +10,7 @@
 class SerializedHyperLogLog : public hll::HyperLogLog {
 
 public:
-    SerializedHyperLogLog(uint8_t b) : hll::HyperLogLog::HyperLogLog(b) {
+    SerializedHyperLogLog(uint8_t b) : HyperLogLog(b) {
     }
 
     char* toString(char* result) {
