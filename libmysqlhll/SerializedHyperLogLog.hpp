@@ -1,7 +1,7 @@
 #if !defined(SERIALIZED_HYPERLOGLOG_HPP)
 #define SERIALIZED_HYPERLOGLOG_HPP
 
-//#include <stdio.h>
+#include <stdio.h>
 #include <string.h>
 
 #include "hyperloglog.hpp"
