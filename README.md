@@ -39,7 +39,25 @@ Compilation
 
 The project uses [CMake](http://www.cmake.org/) as a build tool, and the code is platform independent, so it should compile fine on most platforms (linux, windows, mac).  
 
-**TODO:** Add specific instructions for the major platforms.
+**Linux**
+  
+Tested on ubuntu precise (12.04) 64 bit, but should work pretty much the same on most linux distros.
+  
+**Prerequisites:** Make sure you have the cmake, build-essential and libmysqlclient-dev packages installed.
+
+Run the following from the project's root directory
+
+```bash
+git submodule update --init
+cmake .
+make
+```
+
+After a successful compilation, you will have the libmysqlhll.so binary under the libmysqlhll/ directory.
+  
+**Windows**
+  
+TODO
 
 MySQL Installation
 ------------------
