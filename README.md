@@ -38,6 +38,7 @@ Compilation
 -----------
 
 The project uses [CMake](http://www.cmake.org/) as a build tool, and the code is platform independent, so it should compile fine on most platforms (linux, windows, mac).  
+There might be some issues around compiling cmake that are beyond the scope of this guide to resolve. Please consult the documentation/relevant forums for it. For example, CMake has some issues with compiling 64 bit porjects on windows.  
 
 **Linux**
   
@@ -61,18 +62,17 @@ Tested on Windows 7 with Visual Studio 2010 proffessional, but should work prett
   
 **Prerequisites**: Make sure you have CMake installed.
 
-Run the following from the project's root directory
+Run the following from the project's root directory, in a Visual Studio command prompt (open either 32 or 64 bit command prompt, depending on your chosen target CPU):
 
 ```
 git submodule update --init
 cmake .
-msbuild mysqlhll.sln
+msbuild mysqlhll.sln /p:Configuration=Release
 ```
   
-libmysqlhll-test project will fail compiling but you can safely ignore it.  
 **NOTE:** It is assumed that the mysql header files are located under "C:\\Program Files\\MySQL\\MySQL Server 5.6\\include\\". If you wish to modify it, edit libmysqlhll\CMakeLists.txt.
 
-After that, mysqlhll.dll file will be located under libmysqlhll\Debug.
+After that, mysqlhll.dll file will be located under libmysqlhll\Release.
 
   
 MySQL Installation
