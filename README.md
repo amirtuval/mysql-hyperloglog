@@ -57,8 +57,24 @@ After a successful compilation, you will have the libmysqlhll.so binary under th
   
 **Windows**
   
-TODO
+Tested on Windows 7 with Visual Studio 2010 proffessional, but should work pretty much the same on most windows machines.  
+  
+**Prerequisites**: Make sure you have CMake installed.
 
+Run the following from the project's root directory
+
+```
+git submodule update --init
+cmake .
+msbuild mysqlhll.sln
+```
+  
+libmysqlhll-test project will fail compiling but you can safely ignore it.  
+**NOTE:** It is assumed that the mysql header files are located under "C:\\Program Files\\MySQL\\MySQL Server 5.6\\include\\". If you wish to modify it, edit libmysqlhll\CMakeLists.txt.
+
+After that, mysqlhll.dll file will be located under libmysqlhll\Debug.
+
+  
 MySQL Installation
 ------------------
 
