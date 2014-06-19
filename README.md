@@ -53,6 +53,8 @@ git submodule update --init
 cmake .
 make
 ```
+  
+**NOTE:** You may need to tell cmake where to find mysql header files. The deault is "/usr/include/mysql", but if they are located in another directory on your machine, add "-DMYSQL_INCLUDE_DIR={DIR}" to the cmake command line.  
 
 After a successful compilation, you will have the libmysqlhll.so binary under the libmysqlhll/ directory.
   
@@ -70,7 +72,7 @@ cmake .
 msbuild mysqlhll.sln /p:Configuration=Release
 ```
   
-**NOTE:** It is assumed that the mysql header files are located under "C:\\Program Files\\MySQL\\MySQL Server 5.6\\include\\". If you wish to modify it, edit libmysqlhll\CMakeLists.txt.
+**NOTE:** You may need to tell cmake where to find mysql header files. The deault is "C:\Program Files\MySQL\MySQL Server 5.6\include", but if they are located in another directory on your machine, add "-DMYSQL_INCLUDE_DIR={DIR}" to the cmake command line.  
 
 After that, mysqlhll.dll file will be located under libmysqlhll\Release.
 
