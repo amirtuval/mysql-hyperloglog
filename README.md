@@ -38,7 +38,7 @@ Compilation
 -----------
 
 The project uses [CMake](http://www.cmake.org/) as a build tool, and the code is platform independent, so it should compile fine on most platforms (linux, windows, mac).  
-There might be some issues around compiling cmake that are beyond the scope of this guide to resolve. Please consult the documentation/relevant forums for it. For example, CMake has some issues with compiling 64 bit porjects on windows.  
+There might be some issues around compiling cmake that are beyond the scope of this guide to resolve. Please consult the documentation/relevant forums for it. For example, CMake has some issues with compiling 64 bit projects on windows.  
 
 **Linux**
   
