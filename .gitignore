@@ -16,3 +16,5 @@ libmysqlhll-test
 Win32/
 libmysqlhll/mysqlhll.dir/
 Debug/
+Release/
+x64/
