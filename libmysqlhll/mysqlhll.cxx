@@ -117,11 +117,17 @@ void EXPORT hll_create_clear(UDF_INIT* initid, char* is_null, char* message) {
   shll(initid)->clear();
 }
 
+void get_value_and_length(UDF_ARGS* args, int i, const char** value, uint32_t* length) {
+    *value = (args->args[i] == NULL ? "" : args->args[i]);
+    *length = (args->args[i] == NULL ? 0 : args->lengths[i]);
+}
+
 void EXPORT hll_create_add(UDF_INIT* initid, UDF_ARGS* args, char* is_null, char* message) {
   for(int i = 0; i < args->arg_count; ++i) {
-    LOG("hll_add %.*s %d\n", (int)args->lengths[i], args->args[i], (int)args->lengths[i]);
-
-    shll(initid)->add(args->args[i], args->lengths[i]);
+    const char* value;
+    uint32_t length;
+    get_value_and_length(args, i, &value, &length);
+    shll(initid)->add(value, length);
   }
 }
 
@@ -188,8 +194,9 @@ void EXPORT hll_merge_clear(UDF_INIT* initid, char* is_null, char* message) {
 void EXPORT hll_merge_add(UDF_INIT* initid, UDF_ARGS* args, char* is_null, char* message) {
   for(int i = 0; i < args->arg_count; ++i) {
     LOG("hll_merge_add %d\n", i);
-    long length = args->lengths[i];
-    char* arg = args->args[i];
+    uint32_t length;
+    const char* arg;
+    get_value_and_length(args, i, &arg, &length);
     LOG("hll_add %.*s %d\n", (int)length, arg, (int)length);
     char* hll_str = (char*)malloc(length + 1);
     strncpy(hll_str, arg, length);
