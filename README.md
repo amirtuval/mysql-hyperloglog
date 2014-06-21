@@ -31,6 +31,19 @@ In its default implementation, the plugin uses hyperloglog with a 12 bit width, 
   
 [Here's a more detailed example](sql/example.sql).
 
+**NOTE:** E ch of the above functions can accept any number of arguments. Each value will be treated as an additional value added.  
+So you can issue the following statement, for example:
+
+```sql
+mysql> select hll_compute(1,2,4,3,4,2,1);
++----------------------------+
+| hll_compute(1,2,4,3,4,2,1) |
++----------------------------+
+|                          4 |
++----------------------------+
+1 row in set (0.01 sec)
+```
+
 Installation
 ============
 
