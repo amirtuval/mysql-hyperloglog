@@ -31,7 +31,7 @@ In its default implementation, the plugin uses hyperloglog with a 12 bit width, 
   
 [Here's a more detailed example](sql/example.sql).
 
-**NOTE:** E ch of the above functions can accept any number of arguments. Each value will be treated as an additional value added.  
+**NOTE:** Each of the above functions can accept any number of arguments. Each value will be treated as an additional value added.  
 So you can issue the following statement, for example:
 
 ```sql
