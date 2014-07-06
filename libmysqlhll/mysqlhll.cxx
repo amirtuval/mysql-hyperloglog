@@ -194,9 +194,12 @@ void EXPORT hll_merge_clear(UDF_INIT* initid, char* is_null, char* message) {
 void EXPORT hll_merge_add(UDF_INIT* initid, UDF_ARGS* args, char* is_null, char* message) {
   for(int i = 0; i < args->arg_count; ++i) {
     LOG("hll_merge_add %d\n", i);
+
     uint32_t length;
     const char* arg;
     get_value_and_length(args, i, &arg, &length);
+    if (length == 0) continue; // NULL handling
+    
     LOG("hll_add %.*s %d\n", (int)length, arg, (int)length);
     char* hll_str = (char*)malloc(length + 1);
     strncpy(hll_str, arg, length);
