@@ -202,10 +202,13 @@ void EXPORT hll_merge_add(UDF_INIT* initid, UDF_ARGS* args, char* is_null, char*
     
     LOG("hll_add %.*s %d\n", (int)length, arg, (int)length);
     char* hll_str = (char*)malloc(length + 1);
+    
     strncpy(hll_str, arg, length);
     hll_str[length] = '\0';
 
     SerializedHyperLogLog* current_shll = SerializedHyperLogLog::fromString(hll_str);
+    free(hll_str);
+
     if (current_shll != NULL) {
       shll(initid)->merge(*current_shll);
       delete current_shll;

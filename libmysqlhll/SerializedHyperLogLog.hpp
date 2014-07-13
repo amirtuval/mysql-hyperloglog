@@ -36,6 +36,8 @@ public:
       for(int i = 0; i < outputLength; ++i) {
          result->M_[i] = decoded[i];
       }
+
+      free(decoded);
       
       return result;
     }
