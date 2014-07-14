@@ -22,6 +22,10 @@ public:
     }
 
     static SerializedHyperLogLog* fromString(char* encoded) {
+      if (encoded == NULL) return NULL;
+      if (strlen(encoded) < 3) return NULL;
+      if (strchr(encoded, '|') == NULL) return NULL;
+
       int m;
       char base64[10000];
       sscanf(encoded, "%d|%s", &m, base64);
