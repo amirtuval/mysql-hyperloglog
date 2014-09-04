@@ -32,7 +32,8 @@ public:
 			return NULL;
 
 		int m;
-		int base64StringLength = ceil((1 << m) / 3) * 4;
+		//the base64 string is 4*ceil(n+2/3) where n is 2^b
+		int base64StringLength = ceil(((1 << m) + 2) / 3) * 4;
 		//add padding
 		base64StringLength += 10;
 		char base64[base64StringLength];

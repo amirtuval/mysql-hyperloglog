@@ -63,8 +63,8 @@ public:
 	Data(bool need_result) {
 		shll = new SerializedHyperLogLog(HLL_BIT_WIDTH);
 
-		//the base64 string is 4*ceil(n/3) where n is the number of bytes in the original string
-		int bytesToAllocate = ceil((1 << HLL_BIT_WIDTH) / 3) * 4;
+		//the base64 string is 4*ceil(n+2/3) where n is the number of bytes in the original string(2^HLL_BIT_WIDTH)
+		int bytesToAllocate = ceil(((1 << HLL_BIT_WIDTH) + 2) / 3) * 4;
 		//add padding
 		bytesToAllocate += 10;
 
