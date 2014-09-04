@@ -4,7 +4,7 @@ Makefile
 cmake_install.cmake
 install_manifest.txt
 
-
+.project
 *.so
 *.*~
 libmysqlhll-test
