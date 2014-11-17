@@ -21,7 +21,7 @@ public:
       return result;
     }
 
-    static SerializedHyperLogLog* fromString(char* encoded) {
+    static SerializedHyperLogLog* fromString(const char* encoded) {
       if (encoded == NULL) return NULL;
       if (strlen(encoded) < 3) return NULL;
       if (strchr(encoded, '|') == NULL) return NULL;
