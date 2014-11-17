@@ -16,7 +16,7 @@ public:
     char* toString(char* result) {
       size_t outputLength;
       char* mEncoded = base64_encode(&M_[0], M_.size(), &outputLength);
-      sprintf(result, "%d|%s", b_, mEncoded);
+      sprintf(result, "%d|%d|%s", (legacyMode_ ? 1 : 0), b_, mEncoded);
       free(mEncoded);
       return result;
     }
@@ -24,13 +24,23 @@ public:
     static SerializedHyperLogLog* fromString(const char* encoded) {
       if (encoded == NULL) return NULL;
       if (strlen(encoded) < 3) return NULL;
-      if (strchr(encoded, '|') == NULL) return NULL;
+      const char* firstSep = strchr(encoded, '|');
+      if (firstSep == NULL) return NULL;
 
       int m;
       char base64[10000];
-      sscanf(encoded, "%d|%s", &m, base64);
+      bool legacyMode;
+
+      if (strchr(&firstSep[1], '|') == NULL) { // check if string has 2 '|'
+        sscanf(encoded, "%d|%s", &m, base64);
+        legacyMode = true;
+      } else {
+        int legacyModeInt;
+        sscanf(encoded, "%d|%d|%s", &legacyModeInt, &m, base64);
+        legacyMode = legacyModeInt == 0 ? false : true;
+      }
       
-      SerializedHyperLogLog* result = new SerializedHyperLogLog(m);
+      SerializedHyperLogLog* result = new SerializedHyperLogLog(m, legacyMode);
 
       size_t outputLength;
       unsigned char* decoded = base64_decode(base64, strlen(base64), &outputLength);
