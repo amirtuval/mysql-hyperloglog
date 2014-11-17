@@ -28,7 +28,7 @@ group by date(visit_time);
 # get accurate and estimated counts for the last 3 days per url
 select url, count(distinct user_id) accurate_user_count, hll_compute(user_id) estimated_user_count
 from user_visits
-where visit_time > date_sub('2014-06-16',INTERVAL 3 DAY)
+where visit_time >= date_sub('2014-06-16',INTERVAL 3 DAY)
 group by url;
 
 
@@ -57,7 +57,7 @@ group by day;
 # get accurate and estimated counts for the last 3 days per url
 select url, hll_merge_compute(user_hll) estimated_user_count
 from daily_user_visits
-where day > date_sub('2014-06-16',INTERVAL 3 DAY)
+where day >= date_sub('2014-06-16',INTERVAL 3 DAY)
 group by url;
 
 

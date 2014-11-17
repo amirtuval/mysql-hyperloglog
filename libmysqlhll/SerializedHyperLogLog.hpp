@@ -10,7 +10,7 @@
 class SerializedHyperLogLog : public hll::HyperLogLog {
 
 public:
-    SerializedHyperLogLog(uint8_t b) : HyperLogLog(b) {
+    SerializedHyperLogLog(uint8_t b, bool legacyMode=true) : HyperLogLog(b, legacyMode) {
     }
 
     char* toString(char* result) {

@@ -11,6 +11,8 @@
 #include "constants.hpp"
 #include "SerializedHyperLogLog.hpp"
 
+#define HLL_NEW_BIT_WIDTH 10
+
 extern "C" {
 
 #ifndef NDEBUG
@@ -25,6 +27,13 @@ char EXPORT *hll_create(UDF_INIT *initid, UDF_ARGS *args, char *result,
           unsigned long *length, char *is_null, char *error);
 void EXPORT hll_create_clear(UDF_INIT* initid, char* is_null, char* message);
 void EXPORT hll_create_add(UDF_INIT* initid, UDF_ARGS* args, char* is_null, char* message);
+
+my_bool EXPORT hll_create_legacy_init(UDF_INIT *initid, UDF_ARGS *args, char *message);
+void EXPORT hll_create_legacy_deinit(UDF_INIT *initid);
+char EXPORT *hll_create_legacy(UDF_INIT *initid, UDF_ARGS *args, char *result,
+          unsigned long *length, char *is_null, char *error);
+void EXPORT hll_create_legacy_clear(UDF_INIT* initid, char* is_null, char* message);
+void EXPORT hll_create_legacy_add(UDF_INIT* initid, UDF_ARGS* args, char* is_null, char* message);
 
 my_bool EXPORT hll_compute_init(UDF_INIT *initid, UDF_ARGS *args, char *message);
 void EXPORT hll_compute_deinit(UDF_INIT *initid);
@@ -52,25 +61,35 @@ class Data {
     SerializedHyperLogLog* shll;
     char* result;
 
-    Data(bool need_result) {
-      shll = new SerializedHyperLogLog(HLL_BIT_WIDTH);
+    Data(bool need_result, SerializedHyperLogLog* hll) {
+      init(need_result, hll);
+    }
+
+    Data(bool need_result, int bitWidth, bool legacyMode) {
+      init(need_result, new SerializedHyperLogLog(bitWidth, legacyMode));
+    }
+
+    ~Data() {
+      if (shll != NULL)
+        delete shll;
+      if (result != NULL) {
+        free(result);
+      }
+    }
+
+  private:
+    void init(bool need_result, SerializedHyperLogLog* hll) {
+      shll = hll;
 
       if (need_result) {
         result = (char*)malloc(10000);
       } else {
         result = NULL;
-      }
-    }
-
-    ~Data() {
-      delete shll;
-      if (result != NULL) {
-        free(result);
-      }
+      }      
     }
 };
 
-my_bool init(UDF_INIT *initid, UDF_ARGS *args, char *message, bool need_result, const char* function_name) {
+my_bool init(UDF_INIT *initid, UDF_ARGS *args, char *message, bool need_result, int bitWidth, bool legacyMode, const char* function_name) {
   if (args->arg_count == 0) {
     sprintf(message, "Wrong arguments to %s();  Must have at least 1 argument", function_name);
     return 1;
@@ -80,12 +99,16 @@ my_bool init(UDF_INIT *initid, UDF_ARGS *args, char *message, bool need_result, 
     args->arg_type[i] = STRING_RESULT;
   }
 
-  initid->ptr = (char*)new Data(need_result);
+  initid->ptr = (char*)new Data(need_result, bitWidth, legacyMode);
   return 0;
 }
 
 my_bool EXPORT hll_create_init(UDF_INIT *initid, UDF_ARGS *args, char *message) {
-  return init(initid, args, message, true, "HLL_CREATE");
+  return init(initid, args, message, true, HLL_NEW_BIT_WIDTH, false, "HLL_CREATE");
+}
+
+my_bool EXPORT hll_create_legacy_init(UDF_INIT *initid, UDF_ARGS *args, char *message) {
+  return init(initid, args, message, true, HLL_BIT_WIDTH, true, "HLL_CREATE_LEGACY");
 }
 
 Data* data(UDF_INIT *initid) {
@@ -100,21 +123,37 @@ void EXPORT hll_create_deinit(UDF_INIT *initid) {
   delete data(initid);
 }
 
+void EXPORT hll_create_legacy_deinit(UDF_INIT *initid) {
+  hll_create_deinit(initid);
+}
+
 char EXPORT *hll_create(UDF_INIT *initid, UDF_ARGS *args, char *result, 
           unsigned long *length, char *is_null, char *error) {
 
   char* hll_result = data(initid)->result;
-  shll(initid)->toString(hll_result);
-  *length = strlen(hll_result);
+  if (shll(initid) == NULL) {
+    hll_result[0] = '\0';
+  } else {
+    shll(initid)->toString(hll_result);
+  }
 
-  LOG("hll %s\n", hll_result);
+  *length = strlen(hll_result);
 
   return hll_result;
 }
 
+char EXPORT *hll_create_legacy(UDF_INIT *initid, UDF_ARGS *args, char *result, 
+          unsigned long *length, char *is_null, char *error) {
+  return hll_create(initid, args, result, length, is_null, error);
+}
+
 void EXPORT hll_create_clear(UDF_INIT* initid, char* is_null, char* message) {
-  LOG("hll clear\n");
-  shll(initid)->clear();
+  if (shll(initid) != NULL)
+    shll(initid)->clear();
+}
+
+void EXPORT hll_create_legacy_clear(UDF_INIT* initid, char* is_null, char* message) {
+  hll_create_clear(initid, is_null, message);
 }
 
 void get_value_and_length(UDF_ARGS* args, int i, const char** value, uint32_t* length) {
@@ -131,8 +170,12 @@ void EXPORT hll_create_add(UDF_INIT* initid, UDF_ARGS* args, char* is_null, char
   }
 }
 
+void EXPORT hll_create_legacy_add(UDF_INIT* initid, UDF_ARGS* args, char* is_null, char* message) {
+  hll_create_add(initid, args, is_null, message);
+}
+
 my_bool EXPORT hll_compute_init(UDF_INIT *initid, UDF_ARGS *args, char *message) {
-  return init(initid, args, message, false, "HLL_COMPUTE");
+  return init(initid, args, message, false, HLL_NEW_BIT_WIDTH, false, "HLL_COMPUTE");
 }
 
 void EXPORT hll_compute_deinit(UDF_INIT *initid) {
@@ -141,17 +184,14 @@ void EXPORT hll_compute_deinit(UDF_INIT *initid) {
 
 long long EXPORT hll_compute(UDF_INIT *initid, UDF_ARGS *args, char *result,
           unsigned long *length, char *is_null, char *error) {
-  LOG("hll_compute\n");
   return shll(initid)->estimate();
 }
 
 void EXPORT hll_compute_clear(UDF_INIT* initid, char* is_null, char* message) {
-  LOG("hll_compute_clear\n");
   hll_create_clear(initid, is_null, message);
 }
 
 void EXPORT hll_compute_add(UDF_INIT* initid, UDF_ARGS* args, char* is_null, char* message) {
-  LOG("hll_compute_add\n");
   hll_create_add(initid, args, is_null, message);
 }
 
@@ -168,7 +208,7 @@ my_bool merge_init(UDF_INIT *initid, UDF_ARGS *args, char *message, bool need_re
     }
   }
 
-  initid->ptr = (char*)new Data(need_result);
+  initid->ptr = (char*)new Data(need_result, NULL);
   return 0;
 }
 
@@ -182,25 +222,21 @@ void EXPORT hll_merge_deinit(UDF_INIT *initid) {
 
 char EXPORT *hll_merge(UDF_INIT *initid, UDF_ARGS *args, char *result,
           unsigned long *length, char *is_null, char *error) {
-  LOG("hll_merge\n");
   return hll_create(initid, args, result, length, is_null, error);
 }
 
 void EXPORT hll_merge_clear(UDF_INIT* initid, char* is_null, char* message) {
-  LOG("hll_merge_clear\n");
-  shll(initid)->clear();
+  if (shll(initid) != NULL)
+    shll(initid)->clear();
 }
 
 void EXPORT hll_merge_add(UDF_INIT* initid, UDF_ARGS* args, char* is_null, char* message) {
   for(int i = 0; i < args->arg_count; ++i) {
-    LOG("hll_merge_add %d\n", i);
-
     uint32_t length;
     const char* arg;
     get_value_and_length(args, i, &arg, &length);
     if (length == 0) continue; // NULL handling
     
-    LOG("hll_add %.*s %d\n", (int)length, arg, (int)length);
     char* hll_str = (char*)malloc(length + 1);
     
     strncpy(hll_str, arg, length);
@@ -210,8 +246,12 @@ void EXPORT hll_merge_add(UDF_INIT* initid, UDF_ARGS* args, char* is_null, char*
     free(hll_str);
 
     if (current_shll != NULL) {
-      shll(initid)->merge(*current_shll);
-      delete current_shll;
+      if (shll(initid) != NULL) {
+        shll(initid)->merge(*current_shll);
+        delete current_shll;
+      } else {
+        data(initid)-> shll = current_shll;
+      }
     }
   }
 }
@@ -226,6 +266,7 @@ void EXPORT hll_merge_compute_deinit(UDF_INIT *initid) {
 
 long long EXPORT hll_merge_compute(UDF_INIT *initid, UDF_ARGS *args, char *result,
           unsigned long *length, char *is_null, char *error) {
+  if (shll(initid) == NULL) return 0;
   return shll(initid)->estimate();
 }
 
