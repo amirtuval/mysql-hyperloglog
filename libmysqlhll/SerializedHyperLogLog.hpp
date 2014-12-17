@@ -14,44 +14,51 @@ public:
     }
 
     char* toString(char* result) {
-      size_t outputLength;
-      char* mEncoded = base64_encode(&M_[0], M_.size(), &outputLength);
-      sprintf(result, "%d|%d|%s", (legacyMode_ ? 1 : 0), b_, mEncoded);
-      free(mEncoded);
+      sprintf(result, "%d|%d|bin_", (legacyMode_ ? 1 : 0), b_);
+      memcpy(&result[strlen(result)], &M_[0], M_.size());
       return result;
     }
 
     static SerializedHyperLogLog* fromString(const char* encoded) {
       if (encoded == NULL) return NULL;
-      if (strlen(encoded) < 3) return NULL;
-      const char* firstSep = strchr(encoded, '|');
+      const char* firstSep = (const char*)memchr(encoded, '|', 4);
       if (firstSep == NULL) return NULL;
 
       int m;
-      char base64[10000];
+      const char* data;
       bool legacyMode;
 
-      if (strchr(&firstSep[1], '|') == NULL) { // check if string has 2 '|'
-        sscanf(encoded, "%d|%s", &m, base64);
+      const char* secondSep = (const char*) memchr(&firstSep[1], '|', 4);
+      if (secondSep == NULL) { // check if string has 2 '|'
+        sscanf(encoded, "%d|", &m);
+        data = &firstSep[1];
         legacyMode = true;
       } else {
         int legacyModeInt;
-        sscanf(encoded, "%d|%d|%s", &legacyModeInt, &m, base64);
+        sscanf(encoded, "%d|%d|", &legacyModeInt, &m);
         legacyMode = legacyModeInt == 0 ? false : true;
+        data = &secondSep[1];
       }
       
       SerializedHyperLogLog* result = new SerializedHyperLogLog(m, legacyMode);
 
-      size_t outputLength;
-      unsigned char* decoded = base64_decode(base64, strlen(base64), &outputLength);
+      const unsigned char* decoded;
+      bool freeDecoded;
+      if (strncmp(data, "bin_", 4) == 0) {
+        decoded = (const unsigned char*)&data[4];
+        freeDecoded = false;
+      } else {
+        size_t outputLength;
+        decoded = base64_decode(data, strlen(data), &outputLength);
+        freeDecoded = true;
+      }
 
       if (decoded == NULL) return NULL;
 
-      for(int i = 0; i < outputLength; ++i) {
-         result->M_[i] = decoded[i];
-      }
+      memcpy(&result->M_[0], decoded, result->M_.size());
 
-      free(decoded);
+      if (freeDecoded)
+        free((void*)decoded);
       
       return result;
     }
