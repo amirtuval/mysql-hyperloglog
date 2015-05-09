@@ -133,11 +133,11 @@ char EXPORT *hll_create(UDF_INIT *initid, UDF_ARGS *args, char *result,
   char* hll_result = data(initid)->result;
   if (shll(initid) == NULL) {
     hll_result[0] = '\0';
+    *length = 0;
   } else {
     shll(initid)->toString(hll_result);
+    *length = shll(initid)->stringLength();
   }
-
-  *length = strlen(hll_result);
 
   return hll_result;
 }
@@ -239,7 +239,7 @@ void EXPORT hll_merge_add(UDF_INIT* initid, UDF_ARGS* args, char* is_null, char*
     
     char* hll_str = (char*)malloc(length + 1);
     
-    strncpy(hll_str, arg, length);
+    memcpy(hll_str, arg, length);
     hll_str[length] = '\0';
 
     SerializedHyperLogLog* current_shll = SerializedHyperLogLog::fromString(hll_str);

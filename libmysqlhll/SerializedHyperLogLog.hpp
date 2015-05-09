@@ -19,6 +19,10 @@ public:
       return result;
     }
 
+    int stringLength() {
+      return 10 + M_.size();
+    }
+
     static SerializedHyperLogLog* fromString(const char* encoded) {
       if (encoded == NULL) return NULL;
       const char* firstSep = (const char*)memchr(encoded, '|', 4);
