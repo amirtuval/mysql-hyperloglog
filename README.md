@@ -27,7 +27,7 @@ HLL_MERGE - Given a list of HLL strings, this function will return the HLL strin
 HLL_MERGE_COMPUTE - Given a list of HLL strings, this function will return an integer representing the estimated distinct count of these values.
   
 HyperLogLog stores its data as a byte vector. An HLL string is the base64 representation of the byte vector.  
-In its default implementation, the plugin uses hyperloglog with a 12 bit width, resulting in a 4096 bytes vector. Base64 string of that is ~5500 chars long.
+In its default implementation, the plugin uses hyperloglog with a 10 bit width, resulting in a 1024 bytes vector. Base64 string of that is ~1400 chars long.
   
 [Here's a more detailed example](sql/example.sql).
 
