@@ -11,7 +11,7 @@
 #include "constants.hpp"
 #include "SerializedHyperLogLog.hpp"
 
-#define HLL_NEW_BIT_WIDTH 10
+#define HLL_LEGACY_BIT_WIDTH 12
 
 extern "C" {
 
@@ -104,11 +104,11 @@ my_bool init(UDF_INIT *initid, UDF_ARGS *args, char *message, bool need_result, 
 }
 
 my_bool EXPORT hll_create_init(UDF_INIT *initid, UDF_ARGS *args, char *message) {
-  return init(initid, args, message, true, HLL_NEW_BIT_WIDTH, false, "HLL_CREATE");
+  return init(initid, args, message, true, HLL_BIT_WIDTH, false, "HLL_CREATE");
 }
 
 my_bool EXPORT hll_create_legacy_init(UDF_INIT *initid, UDF_ARGS *args, char *message) {
-  return init(initid, args, message, true, HLL_BIT_WIDTH, true, "HLL_CREATE_LEGACY");
+  return init(initid, args, message, true, HLL_LEGACY_BIT_WIDTH, true, "HLL_CREATE_LEGACY");
 }
 
 Data* data(UDF_INIT *initid) {
@@ -175,7 +175,7 @@ void EXPORT hll_create_legacy_add(UDF_INIT* initid, UDF_ARGS* args, char* is_nul
 }
 
 my_bool EXPORT hll_compute_init(UDF_INIT *initid, UDF_ARGS *args, char *message) {
-  return init(initid, args, message, false, HLL_NEW_BIT_WIDTH, false, "HLL_COMPUTE");
+  return init(initid, args, message, false, HLL_BIT_WIDTH, false, "HLL_COMPUTE");
 }
 
 void EXPORT hll_compute_deinit(UDF_INIT *initid) {
