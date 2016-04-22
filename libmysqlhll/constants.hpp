@@ -1,1 +1,0 @@
-#define HLL_BIT_WIDTH 10
