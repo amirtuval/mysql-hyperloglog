@@ -82,7 +82,7 @@ class Data {
       shll = hll;
 
       if (need_result) {
-        result = (char*)malloc(10000);
+        result = (char*)malloc(std::pow(2,HLL_BIT_WIDTH));
       } else {
         result = NULL;
       }      
